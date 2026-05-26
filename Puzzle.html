@@ -2,37 +2,37 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Puzzle dei Baloss - Sfida Mensile</title>
     <style>
         :root { --primary: #27ae60; --secondary: #2c3e50; --accent: #e74c3c; --gray: #bdc3c7; }
-        body { 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { 
+            width: 100%; 
+            height: 100%;
             font-family: 'Segoe UI', sans-serif; 
             background: #f0f2f5; 
-            margin: 0; 
-            padding: 0; 
             color: var(--secondary); 
-            text-align: center; 
-            box-sizing: border-box; 
             overflow-x: hidden;
-            width: 100%;
         }
-       .container { 
-            max-width: 100%; 
-            width: 100%; 
-            margin: 0 auto; 
+        body {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container { 
+            width: 100%;
+            max-width: 420px;
             background: white; 
-            padding: 15px; 
+            padding: 25px; 
             border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            box-sizing: border-box;
-            position: relative;
-            left: 0;
-            right: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             text-align: center;
         }
-        
+        h1 { font-size: 1.6rem; margin-bottom: 8px; }
+        p { margin-bottom: 10px; }
+
         /* Griglia Puzzle */
         .puzzle-grid { display: grid; gap: 8px; margin: 20px auto; background: #ddd; padding: 10px; border-radius: 12px; width: fit-content; border: 2px solid var(--secondary); }
         .tile { background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 1.2rem; transition: transform 0.1s; }
@@ -47,6 +47,7 @@
         button { background: var(--primary); color: white; border: none; padding: 15px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; margin-top: 10px; }
         button:disabled { background: var(--gray); cursor: not-allowed; }
         select { padding: 12px; border-radius: 8px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; font-size: 1rem; }
+        label { display: block; margin-bottom: 8px; }
         
         .status-msg { margin-top: 10px; font-weight: bold; color: var(--accent); }
     </style>
@@ -90,14 +91,12 @@
     const statusMsg = document.getElementById('status-msg');
     const ticket = document.getElementById('ticket');
 
-    // Premi basati sulla difficoltà
     const prizes = {
         "3": "Adesivo Baloss Limited",
         "4": "Cappellino dei Baloss",
         "5": "Maglietta Ufficiale Baloss"
     };
 
-    // Controllo se ha già giocato questo mese
     function checkMonthlyLimit() {
         const lastWin = localStorage.getItem('lastPuzzleWin');
         if (lastWin) {
@@ -114,14 +113,10 @@
 
     function initPuzzle() {
         if (!checkMonthlyLimit()) return;
-
         currentSize = parseInt(document.getElementById('difficulty').value);
         tiles = Array.from({length: currentSize * currentSize - 1}, (_, i) => i + 1);
-        tiles.push(null); // Spazio vuoto
-        
-        // Mescola i tasselli
+        tiles.push(null);
         tiles = tiles.sort(() => Math.random() - 0.5);
-        
         document.getElementById('setup-area').style.display = 'none';
         grid.style.display = 'grid';
         renderPuzzle();
@@ -131,7 +126,6 @@
         grid.style.gridTemplateColumns = `repeat(${currentSize}, 1fr)`;
         grid.innerHTML = '';
         const tSize = Math.floor(300 / currentSize);
-        
         tiles.forEach((t, i) => {
             const div = document.createElement('div');
             div.className = `tile ${t === null ? 'empty' : ''}`;
@@ -144,12 +138,8 @@
 
     function moveTile(i) {
         const emptyIdx = tiles.indexOf(null);
-        const isAdj = [i-1, i+1, i-currentSize, i+currentSize].includes(emptyIdx);
-        
-        // Impedisce movimenti laterali "a salto" tra righe diverse
         const isSameRow = Math.floor(i / currentSize) === Math.floor(emptyIdx / currentSize);
         const isSameCol = i % currentSize === emptyIdx % currentSize;
-
         if ((isSameRow && Math.abs(i - emptyIdx) === 1) || (isSameCol && Math.abs(i - emptyIdx) === currentSize)) {
             [tiles[i], tiles[emptyIdx]] = [tiles[emptyIdx], tiles[i]];
             renderPuzzle();
@@ -158,7 +148,6 @@
     }
 
     function checkWin() {
-        // Controllo se i numeri sono in ordine
         const win = tiles.slice(0, -1).every((v, idx) => v === idx + 1);
         if (win) {
             grid.style.display = 'none';
@@ -171,16 +160,12 @@
         document.getElementById('win-label').innerText = prizeName;
         document.getElementById('security-code').innerText = Math.floor(Math.random() * 899999 + 100000);
         ticket.style.display = 'block';
-        
-        // Salva la data della vincita per bloccare il mese
         localStorage.setItem('lastPuzzleWin', new Date().toISOString());
         statusMsg.innerText = "";
     }
 
-    // Inizializza il controllo al caricamento
     checkMonthlyLimit();
 </script>
 
 </body>
 </html>
-
